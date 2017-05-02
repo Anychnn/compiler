@@ -1,0 +1,13 @@
+{
+	int i;int j;
+	int a;int b;
+	int max;
+	bool test;
+    if(i+j<a+b){
+        max=-j;
+        test=true;
+    }
+    else {
+        max =i;
+    }
+};

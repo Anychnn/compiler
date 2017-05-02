@@ -1,0 +1,11 @@
+{
+	float i;float j;
+	float a;float b;
+	float max;
+	int test;
+	i=2.0; j=3.0; a=4.0;b=5.5;
+    if(i+j<a+b){
+        max=-j;
+    }
+    else max =i;
+};

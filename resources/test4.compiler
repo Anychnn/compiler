@@ -1,0 +1,8 @@
+{
+	bool flag;
+	flag=true;
+	do{
+        flag=false;
+        break;;;
+	}while(flag);
+};
