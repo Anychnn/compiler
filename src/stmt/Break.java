@@ -6,8 +6,11 @@ package stmt;
 public class Break extends Stmt {
     @Override
     public void gen(int b, int a) {
-        int label=newlabel();
-        emitlabel(label);
+        if(!hasLabel){
+            int label=newlabel();
+            emitlabel(label);
+        }
         emit("goto L"+a);
+        hasLabel=false;
     }
 }

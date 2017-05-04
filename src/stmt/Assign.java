@@ -1,5 +1,6 @@
 package stmt;
 
+import expr.Access;
 import inter.Expr;
 import inter.Id;
 
@@ -17,6 +18,15 @@ public class Assign extends Stmt {
     }
 
     public void check(){
+        if(reference.type instanceof Array&&value.type instanceof Array){
+            Array referenceArrayType= (Array) reference.type;
+            Array valueArrayType= (Array) value.type;
+            if(referenceArrayType.of!=valueArrayType.of){
+                error("type error: assign "+valueArrayType.of+" to "+referenceArrayType.of);
+            }else {
+                return;
+            }
+        }
         if(!this.reference.type.equals(value.type)){
             error("type error: assign "+value.type+" to "+reference.type);
         }
@@ -24,6 +34,12 @@ public class Assign extends Stmt {
 
     @Override
     public void gen(int b, int a) {
+        if(!hasLabel){
+            int label=newlabel();
+            emitlabel(label);
+            hasLabel=true;
+        }
         emit(reference.word.value + " = " + value.reduce());
+        hasLabel=false;
     }
 }

@@ -19,14 +19,19 @@ public class Else extends Stmt {
 
     @Override
     public void gen(int b, int a) {
-        int lable1=newlabel();
+        if(!hasLabel){
+            int lable1=newlabel();
+            emitlabel(lable1);
+        }
+        hasLabel=true;
         int label2=newlabel();
         emit("iffalse "+expr+" goto L"+label2);
-        emitlabel(lable1);
+        hasLabel=false;
         stmt1.gen(b,a);
+        hasLabel=false;
         emit("goto L"+a);
         emitlabel(label2);
+        hasLabel=true;
         stmt2.gen(b,a);
-//        System.out.println(""+lable1);
     }
 }

@@ -17,9 +17,14 @@ public class If extends Stmt {
 
     @Override
     public void gen(int b, int a) {
-        int label=newlabel();
+        if(!hasLabel){
+            emitlabel(newlabel());
+        }
+        int labe2=newlabel();
         emit("iffalse "+bool+" goto L"+a);
-        emitlabel(label);
+        hasLabel=false;
+        emitlabel(labe2);
+        hasLabel=true;
         stmt.gen(b,a);
     }
 }

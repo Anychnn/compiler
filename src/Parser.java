@@ -1,14 +1,20 @@
+import expr.Access;
 import inter.*;
 import stmt.*;
 import lexer.Lexer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/4/29.
  */
 public class Parser {
+
     private Lexer lexer;
     private Token lookahead;
     private Env top;
+
     int used=0;
 
     public Parser(Lexer lexer) {
@@ -19,7 +25,9 @@ public class Parser {
         throw new Exception(msg+":"+lookahead);
     }
     public void move(){
-        lookahead=lexer.move();
+        while ((lookahead=lexer.move())==null){
+        }
+
     }
     public void match(int tag) throws Exception {
         if(lookahead.tag!=tag){
@@ -35,6 +43,7 @@ public class Parser {
         int label1=stmt.newlabel();
         int label2=stmt.newlabel();
         stmt.emitlabel(label1);
+        stmt.hasLabel=true;
         stmt.gen(label1,label2);
         stmt.emitlabel(label2);
     }
@@ -73,19 +82,10 @@ public class Parser {
                 Expr expr1=bool();
                 match(')');
                 Stmt stmt1=null;
-                if(lookahead.tag=='{'){
-                    stmt1=stmts();
-                }else{
-                    stmt1=stmt();
-                }
+                stmt1=stmts();
                 if(lookahead.tag==Tag.Else){
                     match(Tag.Else);
-                    Stmt stmt2=null;
-                    if(lookahead.tag=='{'){
-                        stmt2=stmts();
-                    }else {
-                        stmt2=stmt();
-                    }
+                    Stmt stmt2=stmts();
                     return new Else(expr1,stmt1,stmt2);
                 }
                 return new If(expr1,stmt1);
@@ -102,9 +102,7 @@ public class Parser {
                 return new Break();
             case Tag.Do:
                 match(Tag.Do);
-                match('{');
                 Stmt stmt2=stmts();
-                match('}');
                 match(Tag.While);
                 match('(');
                 Expr expr=bool();
@@ -122,10 +120,17 @@ public class Parser {
             error(((Word)lookahead).value+"  is not defined at line:"+lexer.line);
         }
         match(Tag.ID);
-        match('=');
-        Expr assign=bool();
-        match(';');
-        return new Assign(reference,assign);
+        if(lookahead.tag=='='){
+            match('=');
+            Expr assign=bool();
+            match(';');
+            return new Assign(reference,assign);
+        }else {
+            Access x=offset(reference);
+            match('=');
+            return new SetElem(x,bool());
+        }
+
     }
     public Expr bool() throws Exception {
         Expr expr=or();
@@ -200,16 +205,40 @@ public class Parser {
     public Expr factor() throws Exception {
         Expr x=null;
         switch (lookahead.tag){
+            case '(':
+                match('(');
+                x=bool();
+                match(')');
+                return  x;
+            case '[':
+                match('[');
+                List<Expr> exprList=new ArrayList<>();
+                Expr expr=factor();
+                exprList.add(expr);
+                int size=1;
+                while (lookahead.tag==','){
+                    match(',');
+                    Expr expr1=factor();
+                    exprList.add(expr1);
+                    size++;
+                }
+                match(']');
+                return new ArrayExpr(exprList,new Array(size,expr.type));
             case Tag.ID:
-                x=top.get(lookahead);
-                match(Tag.ID);
-                return x;
+                Id id=top.get(lookahead);
+                move();
+                if(lookahead.tag!='[') return id;
+                return offset(id);
             case Tag.FALSE:
                 match(Tag.FALSE);
                 return Constant.False;
             case Tag.TRUE:
                 match(Tag.TRUE);
                 return Constant.True;
+            case Tag.NUM:
+                Token num=lookahead;
+                match(Tag.NUM);
+                return new Constant(num,Type.Int);
             case Tag.Real:
                 Token tok=lookahead;
                 match(Tag.Real);
@@ -232,6 +261,31 @@ public class Parser {
     public Type type() throws Exception {
         Type p= (Type) lookahead;
         match(Tag.Basic);
+        if(lookahead.tag=='['){
+            p=dims(p);
+        }
         return p;
+    }
+    public Type dims(Type p) throws Exception {
+        match('[');
+        Token tok=lookahead;
+        match(Tag.NUM);
+        match(']');
+        if(lookahead.tag=='['){
+            p=dims(p);
+        }
+        return new Array(((Num)tok).value,p);
+    }
+    public Access offset(Id a) throws Exception {
+        Expr i;Expr w;
+        Expr loc;
+        Type type=a.type;
+        match('[');
+        i=bool();
+        match(']');
+        type=((Array)type).of;
+        w=new Constant(type.width);
+//        loc=new FirstArith(new Token('*'),i,w);
+        return new Access(a,i,type);
     }
 }

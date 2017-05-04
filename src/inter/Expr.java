@@ -18,4 +18,9 @@ public class Expr extends Node {
     public Expr reduce(){
         return this;
     }
+
+    @Override
+    public String toString() {
+        return op.toString();
+    }
 }

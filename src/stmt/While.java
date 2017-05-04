@@ -16,11 +16,10 @@ public class While extends Stmt {
 
     @Override
     public void gen(int b, int a) {
+
         int label1=newlabel();
-        int label2=newlabel();
         emitlabel(label1);
         emit("iffalse "+expr.reduce()+" goto L"+a);
-        emitlabel(label2);
         stmt.gen(b,a);
         emit("goto L"+label1);
     }

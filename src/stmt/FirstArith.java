@@ -12,7 +12,7 @@ public class FirstArith extends Expr {
     private Expr expr1,expr2;
     private Token tok;
     public FirstArith(Token lookahead, Expr expr1, Expr expr2) {
-        super(lookahead, null);
+        super(lookahead, expr1.type);
         this.expr1=expr1;
         this.expr2=expr2;
         tok=lookahead;

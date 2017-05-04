@@ -19,10 +19,12 @@ public class Do extends Stmt {
         Expr temp=expr.reduce();
         int label=newlabel();
         emitlabel(label);
+        hasLabel=true;
         stmt.gen(b,a);
         int label2=newlabel();
         emitlabel(label2);
+        hasLabel=true;
         emit("if "+temp+" goto L"+label);
-
+        hasLabel=false;
     }
 }
