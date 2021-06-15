@@ -1,5 +1,34 @@
 # compiler
+### 程序员三大浪漫之一:编译器
+参考虎书
+讲自定义的程序代码翻译为机器码
+```
+{
+	float i;float j;
+	float a;float b;
+	float max;
+	int test;
+	i=2.0; j=3.0; a=4.0;b=5.5;
+    if(i+j<a+b){
+        max=-j;
+    }
+    else max =i;
+};
+```
 
+```
+L1:		i = 2.0
+L3:		j = 3.0
+L4:		a = 4.0
+L5:		b = 5.5
+L6:		temp1 = i + j
+		temp2 = a + b
+		iffalse temp1 < temp2 goto L7
+L8:		max = -j
+		goto L2
+L7:		max = i
+L2:
+```
 ### 参考文法
 
 block -> { stmts }
